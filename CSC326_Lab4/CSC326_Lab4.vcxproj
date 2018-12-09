@@ -117,9 +117,10 @@
   <ItemGroup>
     <ClInclude Include="ArrayQueue.h" />
     <ClInclude Include="customer.h" />
+    <ClInclude Include="teller.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="driver.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
