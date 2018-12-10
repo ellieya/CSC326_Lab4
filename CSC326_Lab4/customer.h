@@ -1,9 +1,10 @@
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <ctime>
+#include "rng.h"
+
 
 class customer {
+	RNG rng;
 	static int last_ID; //Auto updated when constructor used
 	int ID; //Auto assigned based on last_ID
 	int arrival_time;
@@ -11,7 +12,6 @@ class customer {
 	int service_wait_time; //deted by service
 	char service; //Make service det by RNG. Service dets service_wait_time.
 	void assign_service_type_and_time();
-	int RNG(); //Rolls random number
 
 public:
 	customer();
@@ -19,7 +19,7 @@ public:
 	int get_service_wait_time();
 	int get_total_wait_time();
 	int get_id();
-//	string get_service_type();
+	char get_service_type();
 	void update_total_wait_time(int);
 	void decr_service_wait_time();
 	bool done(); //True when done with services
@@ -48,24 +48,9 @@ int customer::get_id() {
 	return ID;
 }
 
-/*
-string customer::get_service_type() {
-	switch (service) {
-	case 'D':
-		return "Deposit";
-		break;
-	case 'W':
-		return "Withdrawl";
-		break;
-	case 'O':
-		return "Open Account";
-		break;
-	case 'C':
-		return "Close Account";
-		break;
-	}
+char customer::get_service_type() {
+	return service;
 }
-*/
 
 void customer::update_total_wait_time(int current_time) {
 	total_wait_time = arrival_time - current_time + service_wait_time;
@@ -78,7 +63,7 @@ void customer::decr_service_wait_time() {
 int customer::last_ID = 0;
 
 void customer::assign_service_type_and_time() {
-	switch (RNG() % 4) {
+	switch (rng.roll()%4) {
 	case 0:
 		service = 'D'; //Deposit
 		service_wait_time = 2;
@@ -97,12 +82,6 @@ void customer::assign_service_type_and_time() {
 		break;
 	}
 	
-}
-
-int customer::RNG() {
-	time_t timer;
-	srand(time(&timer));
-	return rand();
 }
 
 bool customer::done() {

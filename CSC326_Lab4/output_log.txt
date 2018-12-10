@@ -1,2 +1,2 @@
-Customer 1 has departed at 89 after waiting 2 minutes.
-Customer 3 has departed at 69 after waiting 20 minutes.
+Customer 1 has departed at 0 after waiting 5 minutes. (Service type: W).
+Customer 2 has departed at 0 after waiting 4 minutes. (Service type: D).
