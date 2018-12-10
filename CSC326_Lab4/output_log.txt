@@ -1,0 +1,2 @@
+Customer 1 has departed at 89 after waiting 2 minutes.
+Customer 3 has departed at 69 after waiting 20 minutes.

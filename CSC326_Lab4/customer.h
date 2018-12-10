@@ -10,19 +10,25 @@ class customer {
 	int total_wait_time; //Just keep adding passed time OR 
 	int service_wait_time; //deted by service
 	char service; //Make service det by RNG. Service dets service_wait_time.
-
 	void assign_service_type_and_time();
 	int RNG(); //Rolls random number
 
 public:
+	customer();
 	customer(int);
 	int get_service_wait_time();
 	int get_total_wait_time();
 	int get_id();
+//	string get_service_type();
 	void update_total_wait_time(int);
 	void decr_service_wait_time();
 	bool done(); //True when done with services
+	
 };
+
+customer::customer() {
+
+}
 
 customer::customer(int time)
 	:arrival_time(time), ID(++last_ID)
@@ -42,8 +48,27 @@ int customer::get_id() {
 	return ID;
 }
 
+/*
+string customer::get_service_type() {
+	switch (service) {
+	case 'D':
+		return "Deposit";
+		break;
+	case 'W':
+		return "Withdrawl";
+		break;
+	case 'O':
+		return "Open Account";
+		break;
+	case 'C':
+		return "Close Account";
+		break;
+	}
+}
+*/
+
 void customer::update_total_wait_time(int current_time) {
-	total_wait_time = current_time - arrival_time + service_wait_time;
+	total_wait_time = arrival_time - current_time + service_wait_time;
 }
 
 void customer::decr_service_wait_time() {
