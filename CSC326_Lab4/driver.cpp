@@ -3,11 +3,6 @@
 #include "teller.h" //contains customer.h, rng.h, iostream, and string
 #include "ArrayQueue.h"
 
-/*
-Ayy we basically done!
-Add-ons:
--When closed, dequeue all and continue to service until no more people to service
-*/
 
 using namespace std;
 
@@ -26,18 +21,19 @@ void roll_new_customer(ArrayQueue<customer>&, int, int, int);
 //Rolls random number between X and initial_clock, using time as rand seed. If rolled number is less than or equal to initial_clock/arrival_time_distribution, a new customer will be enqueued.
 //PRE: var/objs line, arrival_time_distribution, initial_clock, and clock must be initialized
 
-void service_next(ArrayQueue<customer>&, teller*, int, int);
+void service_next(ArrayQueue<customer>&, teller*, int, int, int&);
 //Dequeues next avaliable customer and puts them to service and calculates total wait time for the customer
 //PRE: var/objs line, employees, next_teller_i, and clock must be initalized
+//POST: Places new customer onto next available teller, switches teller's status from 'A' to 'B', and increments # of busy tellers
 
 int next_avaliable_teller(teller*, int);
 //Iterates through all service desks to see if there any avaliable tellers
 //PRE: var/objs employees and number_of_tellers must be initialized
 //POST: Returns index of the next avaliable teller. Otherwise, if all tellers are busy, returns -1.
 
-void adjust_all_clocks(ArrayQueue<customer>&, teller*, int&, ofstream&, int);
+void adjust_all_clocks(ArrayQueue<customer>&, teller*, int&, ofstream&, int, int&, int&, int&);
 //PRE: var/objs line, employees, clock, output_file, and number_of_tellers must be initialized. output_file must have an opened file.
-//POST: Updates teller clock, customer clock, and "global" clock and switches service desk statuses back to 'A' if customer is completed with service
+//POST: Updates teller clock, customer clock, and "global" clock and if any customer is completed with service, switches service desk statuses back to 'A', decrements # of busy tellers, and adds customer information to sum + increments customer count
 
 int main() {
 
@@ -45,10 +41,15 @@ int main() {
 		VARIABLE DECLARATION
 	*/
 
-	//User-inputted data
+	//User-inputted datain question
 	int clock;
 	int initial_clock;
 	int arrival_time_distribution;
+
+	//Data required to calculate average
+	int total_customers = 0;
+	int sum = 0;
+	double average_wait_time;
 
 	//Line
 	ArrayQueue<customer> line;
@@ -57,6 +58,7 @@ int main() {
 	teller* employees = nullptr;
 	int next_teller_i;
 	int number_of_tellers;
+	int number_of_busy_tellers = 0; //Used as one of the factors to determine whether service ends or not. Used to avoid unnecessary overhead from running searches.
 	bool service_end = false;
 
 	//File
@@ -80,23 +82,28 @@ int main() {
 		do {
 			next_teller_i = next_avaliable_teller(employees, number_of_tellers);
 			if (!line.isEmpty() && next_teller_i != -1) {
-				service_next(line, employees, next_teller_i, clock);
+				service_next(line, employees, next_teller_i, clock, number_of_busy_tellers);
 			}
 		} while (!line.isEmpty() && next_teller_i != -1);
 
 		print(line, clock, employees, number_of_tellers);
-		adjust_all_clocks(line, employees, clock, output_file, number_of_tellers);
+		adjust_all_clocks(line, employees, clock, output_file, number_of_tellers, number_of_busy_tellers, sum, total_customers);
 		Sleep(1000);
 		system("cls");
 
 		//Update service_end flag
-		if (clock == 0 && line.isEmpty() && /* NEED TO GET CONDITION FOR NO EMPLOYEES ARE STILL BUSY WITH CUSTOMER THAT DOESN'T HAVE INSANE OVERHEAD */)
+		if (clock == 0 && line.isEmpty() && number_of_busy_tellers == 0)
 			//When clock = 0, line is empty, and the no employees are still not busy with a customer, service ends.
 			service_end = true;
 		else
 			service_end = false;
 		
 	}
+
+	average_wait_time = static_cast<double>(sum) / total_customers;
+	cout << total_customers << " customers were served. The average wait time was " << average_wait_time << " minutes!" << endl;
+	output_file << total_customers << " customers were served. The average wait time was " << average_wait_time << " minutes!" << endl;
+	system("pause");
     
     output_file.close();
 
@@ -167,7 +174,7 @@ void roll_new_customer(ArrayQueue<customer> &line, int arrival_time_distribution
 	
 	RNG rng;
 	//Roll for new customer. If no new customer, do nothing.
-	if (((rng.roll()%initial_clock)) <= (initial_clock / static_cast<double>(arrival_time_distribution))) {
+	if (((rng.roll()%initial_clock)) < (initial_clock / static_cast<double>(arrival_time_distribution))) {
 		customer next_customer(clock);
 		line.enqueue(next_customer);
 	}
@@ -183,14 +190,15 @@ teller* get_user_input(int &arrival_time_distribution, int &initial_clock, int &
 	return new teller[number_of_tellers];
 }
 
-void service_next(ArrayQueue<customer>& line, teller* employees, int next_teller_i, int clock) {
+void service_next(ArrayQueue<customer>& line, teller* employees, int next_teller_i, int clock, int& number_of_busy_tellers) {
 	
 	employees[next_teller_i].update_currently_servicing(line.peekFront()); //Bring customer to service
+	number_of_busy_tellers++; //update number_of_busy_tellers counter
 	employees[next_teller_i].get_currently_servicing()->update_total_wait_time(clock); //We now have all the information necessary to update total wait time for customer
 	line.dequeue(); //Dequeue from line
 }
 
-void adjust_all_clocks(ArrayQueue<customer>& line, teller* employees, int& clock, ofstream &output_file, int number_of_tellers) {
+void adjust_all_clocks(ArrayQueue<customer>& line, teller* employees, int& clock, ofstream &output_file, int number_of_tellers, int & number_of_busy_tellers, int & sum, int &total_customers) {
 
 	//Decrement timer for customers receiving service
 	for (int i = 0; i < number_of_tellers; i++) {
@@ -198,10 +206,19 @@ void adjust_all_clocks(ArrayQueue<customer>& line, teller* employees, int& clock
 			employees[i].get_currently_servicing()->decr_service_wait_time(); //Decrement current customer's timer
 			if (employees[i].get_currently_servicing()->done()) { //See if done
 				//If done,
+				//Add customer data to variables required to calculate average
+				sum += employees[i].get_currently_servicing()->get_total_wait_time();
+				total_customers++;
 				//Print customer data to file
-				output_file << "Customer " << employees[i].get_currently_servicing()->get_id() << " has departed at " << clock << " after waiting "	<< employees[i].get_currently_servicing()->get_total_wait_time() << " minutes. (Service type: " << employees[i].get_currently_servicing()->get_service_type() << ")." << endl; 
-                //switch status & delete current customer
-				employees[i].switch_status();  
+				output_file << "Customer " << employees[i].get_currently_servicing()->get_id() << " has departed at ";
+				if (clock != 0)
+					output_file << clock;
+				else
+					output_file << "AFTER HOURS";
+				output_file << " after waiting " << employees[i].get_currently_servicing()->get_total_wait_time() << " minutes. (Service type: " << employees[i].get_currently_servicing()->get_service_type() << ")." << endl; 
+                //switch status
+				employees[i].switch_status(); 
+				number_of_busy_tellers--;
 			}
 		}
 	}

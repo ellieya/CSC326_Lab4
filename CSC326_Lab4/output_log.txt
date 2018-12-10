@@ -1,2 +1,20 @@
-Customer 1 has departed at 0 after waiting 5 minutes. (Service type: W).
-Customer 2 has departed at 0 after waiting 4 minutes. (Service type: D).
+Customer 4 has departed at 45 after waiting 2 minutes. (Service type: D).
+Customer 3 has departed at 43 after waiting 5 minutes. (Service type: W).
+Customer 2 has departed at 40 after waiting 20 minutes. (Service type: O).
+Customer 1 has departed at 31 after waiting 30 minutes. (Service type: C).
+Customer 8 has departed at 26 after waiting 17 minutes. (Service type: W).
+Customer 9 has departed at 24 after waiting 7 minutes. (Service type: D).
+Customer 7 has departed at 20 after waiting 24 minutes. (Service type: O).
+Customer 11 has departed at 15 after waiting 14 minutes. (Service type: W).
+Customer 5 has departed at 15 after waiting 31 minutes. (Service type: C).
+Customer 6 has departed at 13 after waiting 32 minutes. (Service type: C).
+Customer 13 has departed at 13 after waiting 14 minutes. (Service type: D).
+Customer 12 has departed at 10 after waiting 18 minutes. (Service type: W).
+Customer 16 has departed at 8 after waiting 5 minutes. (Service type: D).
+Customer 10 has departed at AFTER HOURS after waiting 36 minutes. (Service type: C).
+Customer 15 has departed at AFTER HOURS after waiting 21 minutes. (Service type: O).
+Customer 14 has departed at AFTER HOURS after waiting 43 minutes. (Service type: C).
+Customer 17 has departed at AFTER HOURS after waiting 34 minutes. (Service type: C).
+Customer 19 has departed at AFTER HOURS after waiting 29 minutes. (Service type: O).
+Customer 18 has departed at AFTER HOURS after waiting 40 minutes. (Service type: C).
+19 customers were served. The average wait time was 22.2105 minutes!

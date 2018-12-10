@@ -1,7 +1,12 @@
+/*
+Lab 4 - Banking Simulation
+Jiali Chen
+In this lab, we use an array implementation of a queue to simulate a bank line.
+*/
+
 #include <iostream>
 #include <string>
 #include "rng.h"
-
 
 class customer {
 	RNG rng;
